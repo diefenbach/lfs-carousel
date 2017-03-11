@@ -227,19 +227,19 @@ class LFSCarouselView(object):
         return update_wrapper(inner, view)
 
     def get_urls(self):
-        from django.conf.urls import patterns, url
+        from django.conf.urls import url
 
         def wrap(view, cacheable=False):
             def wrapper(*args, **kwargs):
                 return self.carousel_view(view, cacheable)(*args, **kwargs)
             return update_wrapper(wrapper, view)
 
-        urlpatterns = patterns('',
+        urlpatterns = [
             url(r'^add-item/(?P<content_type_id>\d*)/(?P<object_id>\d*)/$', wrap(self.add_item), name="lfs_carousel_add_item"),
             url(r'^update-items/(?P<content_type_id>\d*)/(?P<object_id>\d*)/$', wrap(self.update_items), name="lfs_carousel_update_items"),
             url(r'^manage-items/(?P<content_type_id>\d*)/(?P<object_id>\d*)/$', wrap(self.list_items), name="lfs_carousel_manage_items"),
             url(r'^move-item/(?P<id>\d+)$', self.move_item, name="lfs_carousel_move_item"),
-        )
+        ]
 
         return urlpatterns
 
