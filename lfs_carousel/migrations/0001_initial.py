@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                 ('link', models.URLField(default=b'', null=True, verbose_name='URL', blank=True)),
                 ('text', models.TextField(default=b'', verbose_name='Text', blank=True)),
                 ('position', models.PositiveSmallIntegerField(default=999, verbose_name='Position')),
-                ('content_type', models.ForeignKey(related_name='carousel_item', verbose_name='Content type', blank=True, to='contenttypes.ContentType', null=True)),
+                ('content_type', models.ForeignKey(related_name='carousel_item', verbose_name='Content type', blank=True, to='contenttypes.ContentType', null=True, on_delete=models.SET_NULL)),
             ],
             options={
                 'ordering': ('position',),

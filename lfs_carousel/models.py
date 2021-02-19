@@ -24,7 +24,8 @@ class CarouselItem(models.Model):
         - position
           The position of the image within the content object it belongs to.
     """
-    content_type = models.ForeignKey(ContentType, verbose_name=_(u"Content type"), related_name="carousel_item", blank=True, null=True)
+    content_type = models.ForeignKey(ContentType, verbose_name=_(u"Content type"), related_name="carousel_item",
+                                     blank=True, null=True, on_delete=models.SET_NULL)
     content_id = models.PositiveIntegerField(_(u"Content id"), blank=True, null=True)
     content = GenericForeignKey(ct_field="content_type", fk_field="content_id")
 

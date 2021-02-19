@@ -4,11 +4,11 @@ import json
 
 # django imports
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.template import RequestContext
 from django.template.loader import render_to_string
+from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 
@@ -53,11 +53,11 @@ class LFSCarouselView(object):
         items = self.get_item_cls().objects.filter(content_type=ct,
                                                    content_id=object_id)
 
-        result = render_to_string(template_name, RequestContext(request, {
+        result = render_to_string(template_name, {
             "obj": obj,
             "ct": ct,
             "items": items
-        }))
+        }, request)
 
         if as_string:
             return result
@@ -97,7 +97,7 @@ class LFSCarouselView(object):
                 item = self.get_item_cls()(content=obj)
                 try:
                     item.image.save(file_content.name, file_content, save=True)
-                except Exception, e:
+                except Exception as e:
                     logger.info("Upload item: %s %s" % (file_content.name, e))
                     continue
 
