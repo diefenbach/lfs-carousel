@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class LfsCarouselAppConfig(AppConfig):
-    name = 'lfs_carousel'
+    name = "lfs_carousel"
