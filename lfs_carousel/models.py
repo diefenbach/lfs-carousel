@@ -2,7 +2,6 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
 from django.db import models
-from django.conf import settings
 
 from lfs.catalog.settings import THUMBNAIL_SIZES
 from lfs.core.fields.thumbs import ImageWithThumbsField
@@ -47,17 +46,3 @@ class CarouselItem(models.Model):
 
     def __str__(self):
         return self.title
-
-
-if "south" in settings.INSTALLED_APPS:
-    # south rules
-    rules = [
-        (
-            (ImageWithThumbsField,),
-            [],
-            {"sizes": ["sizes", {"default": None}]},
-        )
-    ]
-    from south.modelsinspector import add_introspection_rules
-
-    add_introspection_rules(rules, ["^lfs\.core\.fields\.thumbs"])
