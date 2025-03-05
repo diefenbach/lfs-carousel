@@ -24,7 +24,7 @@ from lfs_carousel.signals import carousel_changed
 # Load logger
 import logging
 
-logger = logging.getLogger("default")
+logger = logging.getLogger("lfs")
 
 
 class LFSCarouselView(object):
