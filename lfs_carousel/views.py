@@ -6,7 +6,6 @@ import json
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
-from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -49,7 +48,7 @@ class LFSCarouselView(object):
 
         items = self.get_item_cls().objects.filter(content_type=ct, content_id=object_id)
 
-        result = render_to_string(template_name, RequestContext(request, {"obj": obj, "ct": ct, "items": items}))
+        result = render_to_string(template_name, {"obj": obj, "ct": ct, "items": items}, request=request)
 
         if as_string:
             return result
