@@ -1,60 +1,213 @@
-{% load i18n %}
+{% load i18n static %}
 
 <div id="carousel-items">
-<h2 class="heading-first">{% trans 'Carousel items' %}</h2>
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header bg-primary-subtle">
+                    <h5 class="mb-0">{% trans 'Carousel Items' %}</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div id="items-list">
+                        {% if items %}
+                            <form id="carousel-items-update-form"
+                                  action="{% url 'lfs_carousel_update_items' ct.pk obj.pk %}"
+                                  method="post">
+                                {% csrf_token %}
+                                
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th style="width: 50px;">
+                                                    <div class="form-check">
+                                                        <input type="checkbox"
+                                                               class="form-check-input select-all"
+                                                               id="select-all-items"
+                                                               value="delete-images" />
+                                                        <label class="form-check-label" for="select-all-items">
+                                                            <span class="visually-hidden">{% trans 'Select All' %}</span>
+                                                        </label>
+                                                    </div>
+                                                </th>
+                                                <th style="width: 100px;">{% trans 'Position' %}</th>
+                                                <th style="width: 80px;">{% trans 'Image' %}</th>
+                                                <th>{% trans 'Title' %}</th>
+                                                <th>{% trans 'URL' %}</th>
+                                                <th>{% trans 'Text' %}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for item in items %}
+                                            <tr>
+                                                <td>
+                                                    <div class="form-check">
+                                                        <input type="checkbox"
+                                                               class="form-check-input select-delete-images"
+                                                               id="delete-{{ item.id }}"
+                                                               name="delete-{{ item.id }}" />
+                                                        <label class="form-check-label" for="delete-{{ item.id }}">
+                                                            <span class="visually-hidden">{% trans 'Select item' %}</span>
+                                                        </label>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <input type="number" 
+                                                           name="position-{{ item.id }}" 
+                                                           value="{{ item.position }}" 
+                                                           class="form-control form-control-sm text-center"
+                                                           min="1"
+                                                           style="width: 80px;" />
+                                                </td>
+                                                <td>
+                                                    <img src="{{ item.image.url_60x60 }}"
+                                                         alt="{{ item.title }}"
+                                                         title="{{ item.title }}"
+                                                         class="img-thumbnail"
+                                                         style="max-width: 60px; max-height: 60px;" />
+                                                </td>
+                                                <td>
+                                                    <input type="text" 
+                                                           name="title-{{ item.id }}" 
+                                                           value="{{ item.title }}" 
+                                                           class="form-control form-control-sm"
+                                                           placeholder="{% trans 'Enter title' %}" />
+                                                </td>
+                                                <td>
+                                                    <input type="url" 
+                                                           name="link-{{ item.id }}" 
+                                                           value="{{ item.link }}" 
+                                                           class="form-control form-control-sm"
+                                                           placeholder="{% trans 'Enter URL' %}" />
+                                                </td>
+                                                <td>
+                                                    <input type="text" 
+                                                           name="text-{{ item.id }}" 
+                                                           value="{{ item.text }}" 
+                                                           class="form-control form-control-sm"
+                                                           placeholder="{% trans 'Enter description' %}" />
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </form>
+                        {% else %}
+                            <div class="text-center py-5 text-muted">
+                                <i class="bi bi-images display-4 d-block mb-3"></i>
+                                <p class="mb-0">{% trans 'No carousel items yet.' %}</p>
+                                <small>{% trans 'Upload some images to get started.' %}</small>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if items %}
+                <div class="card-footer bg-light">
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary" type="submit" name="update" form="carousel-items-update-form">
+                            <i class="bi bi-save"></i>
+                            {% trans 'Update Items' %}
+                        </button>
+                        <button class="btn btn-outline-danger" type="submit" name="delete" form="carousel-items-update-form">
+                            <i class="bi bi-trash"></i>
+                            {% trans 'Delete Selected' %}
+                        </button>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
 
-<div id="items-list">
-    {% include "lfs_carousel/items-list.html" %}
+            <div class="card">
+                <div class="card-header bg-primary-subtle">
+                    <h5 class="mb-0">{% trans 'Upload New Items' %}</h5>
+                </div>
+                <div class="card-body">
+                    <form action="{% url 'lfs_carousel_add_item' ct.pk obj.pk %}" 
+                          method="POST" 
+                          enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="carousel-files" class="form-label">{% trans 'Select Images' %}</label>
+                            <input class="form-control" 
+                                   type="file" 
+                                   id="carousel-files"
+                                   name="files[]" 
+                                   multiple 
+                                   accept="image/*"
+                                   required>
+                            <div class="form-text">{% trans 'You can select multiple images at once.' %}</div>
+                        </div>
+                        <div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-upload"></i>
+                                {% trans 'Upload Images' %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<h2 class="heading-middle">{% trans 'Add items' %}</h2>
-<div id="carousel-content">
-    <form id="file_upload" action="{% url 'lfs_carousel_add_item' ct.pk obj.pk %}" method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        <input class="button" type="file" name="files[]" multiple>
-    </form>
-    <table id="images-uploads-table" data="{% url 'lfs_carousel_manage_items' ct.pk obj.pk %}" msg='{% trans "Uploading images:" %}'></table>
-</div>
 <script>
-    $(function() {
-        // items tab
-        var image_file_upload = $('#file_upload'),
-            image_upload_url = image_file_upload.prop('action');
-
-        image_file_upload.fileupload({
-            url: image_upload_url,
-            dataType: 'json',
-            singleFileUploads: false // add event will now receive a list of files
-        }).on('fileuploadadd', function (e, data) {
-                var files_table = $("#images-uploads-table");
-                var fileNames = '';
-                var msg = files_table.attr("msg");
-
-                $.each(data.files, function (index, file) {
-                    fileNames = fileNames + file.name + '<br>';
-                });
-                files_table.append($(
-                    '<tr>' +
-                    '<td><div style="font-weight:bold; padding-bottom:10px">' + msg + '<img src="' + STATIC_URL + 'lfs/img/ajax-loader.gif" style="padding:8px 0 0 10px" /></div>' + fileNames + '<\/td>' +
-                    '<\/tr>'
-                ));
-
-                data.submit();
-          }).on('fileuploaddone', function (e, data) {
-                var uploads_table = $("#images-uploads-table");
-                var url = uploads_table.attr("data");
-
-                // after upload is done remove information about uploading
-                uploads_table.empty();
-
-                $.get(url, function(data) {
-                    data = safeParseJSON(data);
-                    $("#items-list").html(data["items"]);
-                    $.jGrowl(data["message"]);
-                });
-          })
-        .prop('disabled', !$.support.fileInput)
-        .parent().addClass($.support.fileInput ? undefined : 'disabled');
+// Select all functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAll = document.querySelector('.select-all');
+    const selectItems = document.querySelectorAll('.select-delete-images');
+    
+    if (selectAll) {
+        selectAll.addEventListener('change', function() {
+            selectItems.forEach(item => {
+                item.checked = this.checked;
+            });
+        });
+    }
+    
+    // Update select all when individual items change
+    selectItems.forEach(item => {
+        item.addEventListener('change', function() {
+            const allChecked = Array.from(selectItems).every(item => item.checked);
+            const someChecked = Array.from(selectItems).some(item => item.checked);
+            
+            if (selectAll) {
+                selectAll.checked = allChecked;
+                selectAll.indeterminate = someChecked && !allChecked;
+            }
+        });
     });
+});
+
+// Move item function
+function moveItem(itemId, direction) {
+    const url = '{% url "lfs_carousel_move_item" 0 %}?direction=' + direction;
+    const moveUrl = url.replace('0', itemId);
+    
+    fetch(moveUrl, {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.items) {
+            document.getElementById('items-list').innerHTML = data.items;
+        }
+        if (data.message) {
+            // Show success message
+            const alert = document.createElement('div');
+            alert.className = 'alert alert-success alert-dismissible fade show';
+            alert.innerHTML = `
+                ${data.message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.querySelector('#carousel-items').prepend(alert);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
 </script>
-</div>

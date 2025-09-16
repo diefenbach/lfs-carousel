@@ -101,15 +101,33 @@ class LFSCarouselView(object):
 
         carousel_changed.send(obj, request=request)
 
-        result = json.dumps({"name": file_content.name, "type": "image/jpeg", "size": "123456789"})
-        return HttpResponse(result)
+        # Check if this is an AJAX request or regular form submission
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            # Return JSON for AJAX requests (backward compatibility)
+            result = json.dumps({"name": file_content.name, "type": "image/jpeg", "size": "123456789"})
+            return HttpResponse(result)
+        else:
+            # Redirect for regular form submissions
+            from django.contrib import messages
+
+            messages.success(request, _("Images have been uploaded successfully."))
+            return HttpResponseRedirect(reverse("lfs_manage_shop_carousel"))
 
     def update_items(self, request, content_type_id, object_id):
         """Saves/deletes items with given ids (passed by request body)."""
         ct = lfs_get_object_or_404(ContentType, pk=content_type_id)
         obj = ct.get_object_for_this_type(pk=object_id)
 
+        # Check for action in POST data (supports both 'action' and button names)
         action = request.POST.get("action")
+        if not action:
+            if "delete" in request.POST:
+                action = "delete"
+            elif "update" in request.POST:
+                action = "update"
+
+        message = _("Carousel items have been processed.")  # Default message
+
         if action == "delete":
             message = _("Carousel items have been deleted.")
             for key in request.POST.keys():
@@ -148,16 +166,11 @@ class LFSCarouselView(object):
 
         carousel_changed.send(obj, request=request)
 
-        html = [["#items-list", self.list_items(request, content_type_id, object_id, as_string=True)]]
-        result = json.dumps(
-            {
-                "html": html,
-                "message": message,
-            },
-            cls=LazyEncoder,
-        )
+        # Redirect back to the carousel tab in shop management
+        from django.contrib import messages
 
-        return HttpResponse(result, content_type="application/json")
+        messages.success(request, message)
+        return HttpResponseRedirect(reverse("lfs_manage_shop_carousel"))
 
     def move_item(self, request, id):
         """Moves the items with passed id up or down.
