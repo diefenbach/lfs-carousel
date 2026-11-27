@@ -1,78 +1,77 @@
-What is it?
-===========
+# lfs-carousel
 
-LFS Carousel is pluggable carousel/slider application for use with LFS (Lightning Fast Shop)
+An image carousel for [LFS](https://github.com/diefenbach/django-lfs) shops: managers upload images with a title,
+text and link in the management interface, and the shop shows them on its start page.
 
-See project wiki for more details: https://github.com/pigletto/lfs-carousel/wiki/What-is-it%3F
+## Requirements
 
+django-lfs 1.0 or newer (Django 5.2, Python 3.12+).
 
-Compatibility
-=============
-For django 1.4 use branch 1.0, for 1.5+ use current tip
+## Installation
 
+```sh
+pip install lfs-carousel
+```
 
-Basic usage
-===========
+Add the app and its URLs, then create its table:
 
-* add lfs_carousel to INSTALLED_APPS in your settings.py
-* add lfs_carousel urls to your site urls.py like:
+```python
+# settings.py
+INSTALLED_APPS = [
+    # ...
+    "lfs_carousel",
+]
+```
 
-  <pre lang="python"><code>
-      from lfs_carousel import carousel
-      urlpatterns += patterns("",
-        (...)
-        (r'^carousel/', include(carousel.urls)),
-        (...)
-      )
-  </code></pre>
-  
-* add carousel to the management panel. It will be visible at 'Shop' -> 'Settings' page as new 'Carousel' tab:
-  copy lfs/templates/manage/shop/shop.html to your theme and modify it by adding:
+```python
+# urls.py
+from lfs_carousel.views import carousel
 
-  ```html
-      {% load lfs_carousel_tags %}
-      ( ... )
-      <div id="manage-tabs">
-        <ul>
-            <li class="ui-tabs-nav-item"><a href="#data">{% trans 'Shop' %}</a></li>
-            <li class="ui-tabs-nav-item"><a href="#default-values">{% trans 'Default Values' %}</a></li>
-            <li class="ui-tabs-nav-item"><a href="#portlets">{% trans 'Portlets' %}</a></li>
-            **<li class="ui-tabs-nav-item"><a href="#carousel-items">{% trans 'Carousel' %}</a></li>**
-        </ul>
-      (...)
-      <div id="portlets">
-        {{ portlets|safe }}
-      </div>
-      {% carousel_management shop %}
-  ```
-  
-* add carousel to your shop's start page
+urlpatterns += [path("carousel/", include(carousel.urls))]
+```
 
-  By default lfs_carousel uses coin-slider but you can use anything you want. 
-  
-  First add necessary JavaScript and CSS files either to base.html or to shop.html:
+```sh
+python manage.py migrate
+```
 
-  ```html
-      <link rel="stylesheet" href="{{ STATIC_URL }}coin-slider/coin-slider-styles.css" type="text/css" />
-      <script type="text/javascript" src="{{ STATIC_URL }}coin-slider/coin-slider.min.js"></script>
-      <script type="text/javascript">
-            $(document).ready(function() {
-                $('#coin-slider').coinslider({ width: 400, navigation: true, delay: 10000, hoverPause: true });
-            });
-      </script>
-  ```
-  
-  Second: copy lfstheme/templates/lfs/shop/shop.html to your theme and add:
-  ```html
-    {% load lfs_carousel_tags %}
-    (...)
-    {% carousel_show shop %}
-  ```
-  
-* run syncdb (!)
+## Managing the carousel
 
+With the app installed, the management interface shows a **Carousel** tab under Shop. There managers upload images
+(several at once), set each item's title, text, link and position, and delete items. Only users with the
+`core.manage_shop` permission can change the carousel; others are sent to the login page.
 
-History
-=======
+## Showing the carousel
 
-1.1 - added Django 1.6 compatibility
+[lfs-theme](https://github.com/diefenbach/lfs-theme) shows the carousel on the start page as a slider when the app is
+installed; nothing else to do.
+
+In your own theme, add the tag where the carousel belongs, usually in `lfs/shop/shop.html`:
+
+```django
+{% load lfs_carousel_tags %}
+{% carousel_show shop %}
+```
+
+It renders `lfs_carousel/carousel.html` with `items` (the carousel items in order of their position). The add-on's
+template shows them as a plain list of images with title, text and link; override the template in your theme to turn
+them into a slider. Without items it renders nothing.
+
+`{% carousel_image_url request shop %}` returns the absolute URL of the first image, for example for an `og:image`.
+
+## Development
+
+```sh
+pip install -e . pytest pytest-django
+pytest
+```
+
+## License
+
+BSD 3-Clause, see [LICENSE.txt](LICENSE.txt).
+
+## History
+
+- 2.0.0: for django-lfs 1.0 (Django 5.2): management tab in the new management interface, a default template for
+  `carousel_show`, visitors without permission are sent to the login page, tests. Removes the coin-slider files and
+  the unused, unprotected move-item and manage-items URLs.
+- 1.1: Django 1.6 compatibility.
