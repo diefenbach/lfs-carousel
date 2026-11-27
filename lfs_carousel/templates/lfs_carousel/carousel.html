@@ -1,0 +1,16 @@
+{# The carousel items as a plain list; a theme overrides this template to show them as a slider (lfs-theme does). #}
+{% if items %}
+    <div class="lfs-carousel">
+        {% for item in items %}
+            <figure class="lfs-carousel-item">
+                {% if item.link %}<a href="{{ item.link }}">{% endif %}
+                {% if item.image %}<img src="{{ item.image.url }}" alt="{{ item.title|striptags }}">{% endif %}
+                <figcaption>
+                    <strong>{{ item.title }}</strong>
+                    {% if item.text %}<p>{{ item.text|linebreaksbr }}</p>{% endif %}
+                </figcaption>
+                {% if item.link %}</a>{% endif %}
+            </figure>
+        {% endfor %}
+    </div>
+{% endif %}
