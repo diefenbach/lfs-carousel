@@ -12,6 +12,7 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 
 # lfs.imports
+from django.contrib.auth.views import redirect_to_login
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
 from lfs.caching.utils import lfs_get_object_or_404
@@ -62,26 +63,6 @@ class LFSCarouselView(object):
             )
 
             return HttpResponse(result)
-
-    def list_items(
-        self, request, content_type_id, object_id, as_string=False, template_name="lfs_carousel/items-list.html"
-    ):
-        """ """
-
-        result = self.manage_items(request, content_type_id, object_id, as_string=True, template_name=template_name)
-
-        if as_string:
-            return result
-        else:
-            result = json.dumps(
-                {
-                    "items": result,
-                    "message": _("Carousel items have been added."),
-                },
-                cls=LazyEncoder,
-            )
-
-            return HttpResponse(result, content_type="application/json")
 
     def add_item(self, request, content_type_id, object_id):
         """Adds an image/carousel item to object"""
@@ -172,50 +153,6 @@ class LFSCarouselView(object):
         messages.success(request, message)
         return HttpResponseRedirect(reverse("lfs_manage_shop_carousel"))
 
-    def move_item(self, request, id):
-        """Moves the items with passed id up or down.
-
-        **Parameters:**
-            id
-                The id of the item which should be edited.
-
-        **Query String:**
-            direction
-                The direction in which the item should be moved. One of 0 (up)
-                or 1 (down).
-
-        **Permission:**
-            edit (of the belonging content object)
-        """
-        item = self.get_item_cls().objects.get(pk=id)
-        obj = item.content
-
-        direction = request.GET.get("direction", 0)
-
-        if direction == "1":
-            item.position += 15
-        else:
-            item.position -= 15
-            if item.position < 0:
-                item.position = 10
-
-        item.save()
-
-        ct = ContentType.objects.get_for_model(obj)
-
-        self.refresh_positions(ct, obj.pk)
-
-        html = [["#items-list", self.list_items(request, ct.pk, obj.pk, as_string=True)]]
-
-        result = json.dumps(
-            {
-                "html": html,
-            },
-            cls=LazyEncoder,
-        )
-
-        return HttpResponse(result)
-
     # copied from contrib.admin.sites
     def has_permission(self, request):
         """Returns True if the given HttpRequest has permission to view
@@ -231,7 +168,7 @@ class LFSCarouselView(object):
 
         def inner(request, *args, **kwargs):
             if not self.has_permission(request):
-                return HttpResponseRedirect("%s?next=%s" % (reverse("django.contrib.auth.views.login"), request.path))
+                return redirect_to_login(request.get_full_path())
             return view(request, *args, **kwargs)
 
         if not cacheable:
@@ -262,12 +199,6 @@ class LFSCarouselView(object):
                 wrap(self.update_items),
                 name="lfs_carousel_update_items",
             ),
-            re_path(
-                r"^manage-items/(?P<content_type_id>\d*)/(?P<object_id>\d*)/$",
-                wrap(self.list_items),
-                name="lfs_carousel_manage_items",
-            ),
-            re_path(r"^move-item/(?P<id>\d+)$", self.move_item, name="lfs_carousel_move_item"),
         ]
 
         return urlpatterns

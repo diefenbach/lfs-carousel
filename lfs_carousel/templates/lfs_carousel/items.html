@@ -178,36 +178,4 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
-
-// Move item function
-function moveItem(itemId, direction) {
-    const url = '{% url "lfs_carousel_move_item" 0 %}?direction=' + direction;
-    const moveUrl = url.replace('0', itemId);
-    
-    fetch(moveUrl, {
-        method: 'GET',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.items) {
-            document.getElementById('items-list').innerHTML = data.items;
-        }
-        if (data.message) {
-            // Show success message
-            const alert = document.createElement('div');
-            alert.className = 'alert alert-success alert-dismissible fade show';
-            alert.innerHTML = `
-                ${data.message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-            document.querySelector('#carousel-items').prepend(alert);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
-}
 </script>
